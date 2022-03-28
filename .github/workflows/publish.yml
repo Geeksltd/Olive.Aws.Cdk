@@ -1,0 +1,24 @@
+name: Publish Package
+
+on:
+  push:
+    branches: [ main ]
+    
+jobs:
+ build:
+    strategy:
+      matrix:
+        configuration: [Release]
+
+
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Publish NuGet Package
+      uses: brandedoutcast/publish-nuget@v2
+      with:
+        PROJECT_FILE_PATH: Olive.Aws.Cdk.csproj
+        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+
