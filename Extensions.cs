@@ -1,7 +1,6 @@
 ﻿using Amazon.CDK;
 using Amazon.CDK.AWS.EC2;
 using Amazon.CDK.AWS.Lambda;
-using Infrastructure;
 using System.Collections.Generic;
 using System.Linq;
 using kms = Amazon.CDK.AWS.KMS;

@@ -1,5 +1,5 @@
 ﻿using Amazon.CDK.AWS.SQS;
-using Infrastructure.Stacks;
+using Olive.Aws.Cdk.Stacks;
 using System;
 
 namespace Olive.Aws.Cdk
@@ -17,10 +17,10 @@ namespace Olive.Aws.Cdk
         public void GrantSendMessages(ServiceStack stack) =>
         Grant(stack, $"write-for-{stack.Name.ToLower()}-{Name.ToLower()}", Action.Sqs.Write);
 
-        internal void GrantConsumeMessages(Infrastructure.Stacks.ServiceStack stack) =>
+        internal void GrantConsumeMessages(ServiceStack stack) =>
             Grant(stack, $"write-for-{stack.Name.ToLower()}-{Name.ToLower()}", Action.Sqs.Read);
 
-        internal void Grant(ServiceStack stack, string inlinePolicyName, Infrastructure.Action[] actions)
+        internal void Grant(ServiceStack stack, string inlinePolicyName, Action[] actions)
         {
             var policy = PolicyFactory.Create(stack,
                                               inlinePolicyName,

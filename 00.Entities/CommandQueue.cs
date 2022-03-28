@@ -1,6 +1,6 @@
 ﻿using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.SQS;
-using Infrastructure.Stacks;
+using Olive.Aws.Cdk.Stacks;
 
 namespace Olive.Aws.Cdk
 {

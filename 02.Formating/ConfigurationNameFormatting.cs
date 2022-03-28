@@ -1,4 +1,4 @@
-﻿using Infrastructure.Stacks;
+﻿using Olive.Aws.Cdk.Stacks;
 using Olive;
 using System;
 

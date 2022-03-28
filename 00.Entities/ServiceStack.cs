@@ -299,7 +299,7 @@ namespace Olive.Aws.Cdk.Stacks
             return sesBucket;
         }
 
-        protected virtual LambdaMemorySize LambdaMemorySize() => Infrastructure.LambdaMemorySize.Small;
+        protected virtual LambdaMemorySize LambdaMemorySize() => Cdk.LambdaMemorySize.Small;
 
         protected virtual int LambdaTimeoutSeconds() => 60;
 
