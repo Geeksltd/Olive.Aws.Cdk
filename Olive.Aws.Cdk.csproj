@@ -4,14 +4,11 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Geeks Ltd</Authors>
     <Company>Geeks Ltd</Company>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
+    <None Remove="BaseFunction.zip" />	
 
-  <ItemGroup>
-    <None Remove="hello-world.zip" />
-  </ItemGroup>
-
-  <ItemGroup>
+	<ItemGroup>
     <!-- CDK Construct Library dependencies -->
     <PackageReference Include="Amazon.CDK" Version="1.93.0" />
     <PackageReference Include="Amazon.CDK.AWS.APIGateway" Version="1.93.0" />
@@ -36,9 +33,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="hello-world.zip" />
+    <None Update="BaseFunction.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
-
+    <Resource Include="hello-world.zip" />	
+	
 
 </Project>

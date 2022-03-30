@@ -311,7 +311,7 @@ namespace Olive.Aws.Cdk.Stacks
                 new FunctionProps
                 {
                     FunctionName = functionName,
-                    Code = Code.FromAsset("hello-world.zip"),
+                    Code = Code.FromAsset("BaseFunction.zip"),
                     Runtime = Runtime.DOTNET_CORE_3_1,
                     Handler = ApplicationFunctionHandler(),
                     Timeout = LambdaTimeoutSeconds().Seconds(),
