@@ -6,8 +6,6 @@
     <Company>Geeks Ltd</Company>
     <Version>1.0.1</Version>
   </PropertyGroup>
-    <None Remove="BaseFunction.zip" />	
-
 	<ItemGroup>
     <!-- CDK Construct Library dependencies -->
     <PackageReference Include="Amazon.CDK" Version="1.93.0" />
@@ -36,9 +34,6 @@
     <None Update="BaseFunction.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-
-    <Resource Include="hello-world.zip" />	
-	
+  </ItemGroup>	
 
 </Project>
