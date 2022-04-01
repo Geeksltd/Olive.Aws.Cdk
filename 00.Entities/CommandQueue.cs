@@ -1,4 +1,5 @@
-﻿using Amazon.CDK.AWS.Lambda.EventSources;
+﻿using System.Collections.Generic;
+using Amazon.CDK.AWS.Lambda.EventSources;
 using Amazon.CDK.AWS.SQS;
 using Olive.Aws.Cdk.Stacks;
 
@@ -24,6 +25,7 @@ namespace Olive.Aws.Cdk
             this.GrantSendMessages(stack);
             AddToConfiguration(stack);
         }
+        public void ConfigureSendMessages(IEnumerable<ServiceStack> stacks) => stacks.Do(ConfigureSendMessages);
 
         void AddToConfiguration(ServiceStack stack) => stack.ApplicationFunction?.AddApplicationConfig(ConfigKey, GetUrl());
 

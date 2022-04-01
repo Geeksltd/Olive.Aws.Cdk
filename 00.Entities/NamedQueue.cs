@@ -1,6 +1,7 @@
 ﻿using Amazon.CDK.AWS.SQS;
 using Olive.Aws.Cdk.Stacks;
 using System;
+using System.Collections.Generic;
 
 namespace Olive.Aws.Cdk
 {
@@ -16,6 +17,7 @@ namespace Olive.Aws.Cdk
 
         public void GrantSendMessages(ServiceStack stack) =>
         Grant(stack, $"write-for-{stack.Name.ToLower()}-{Name.ToLower()}", Action.Sqs.Write);
+        public void GrantSendMessages(IEnumerable<ServiceStack> stacks) => stacks.Do(GrantSendMessages);
 
         internal void GrantConsumeMessages(ServiceStack stack) =>
             Grant(stack, $"write-for-{stack.Name.ToLower()}-{Name.ToLower()}", Action.Sqs.Read);
