@@ -4,8 +4,18 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Geeks Ltd</Authors>
     <Company>Geeks Ltd</Company>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="BaseFunction.zip" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="BaseFunction.zip">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+  </ItemGroup>
 	<ItemGroup>
     <!-- CDK Construct Library dependencies -->
     <PackageReference Include="Amazon.CDK" Version="1.93.0" />
@@ -28,12 +38,6 @@
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />
     -->
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="BaseFunction.zip">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>	
 
 </Project>
