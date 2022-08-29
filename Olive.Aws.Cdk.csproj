@@ -4,7 +4,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Geeks Ltd</Authors>
     <Company>Geeks Ltd</Company>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,7 +18,7 @@
   </ItemGroup>
 	<ItemGroup>
     <!-- CDK Construct Library dependencies -->
-    <PackageReference Include="Amazon.CDK" Version="1.93.0" />
+		<PackageReference Include="Amazon.CDK" Version="1.93.0" />
     <PackageReference Include="Amazon.CDK.AWS.APIGateway" Version="1.93.0" />
     <PackageReference Include="Amazon.CDK.AWS.APIGatewayv2.Integrations" Version="1.93.0" />
     <PackageReference Include="Amazon.CDK.AWS.CodeBuild" Version="1.93.0" />
@@ -33,7 +33,7 @@
     <PackageReference Include="Amazon.CDK.AWS.SecretsManager" Version="1.93.0" />
     <PackageReference Include="Amazon.CDK.AWS.SQS" Version="1.93.0" />
     <PackageReference Include="Amazon.CDK.AWS.SSM" Version="1.93.0" />
-    <PackageReference Include="Olive" Version="2.1.239" />
+    <PackageReference Include="Olive" Version="2.1.324" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />

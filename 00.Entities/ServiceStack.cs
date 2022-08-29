@@ -404,7 +404,7 @@ namespace Olive.Aws.Cdk.Stacks
             });
         }
 
-        string GetDomainName() => Subdomain.Or(Name) + "." + App.Domain;
+        public string GetDomainName() => Subdomain.Or(Name) + "." + App.Domain;
 
         public CommandQueue CreateCommandQueue(string name, bool isFifo = true, double? visibilityTimeout = null)
         {
