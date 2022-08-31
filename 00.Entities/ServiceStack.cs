@@ -56,7 +56,7 @@ namespace Olive.Aws.Cdk.Stacks
         {
         }
 
-        protected ServiceStack(Suite scope, string name, ServiceStackProps props = null) : base(scope, name)
+        protected ServiceStack(Suite scope, string name, ServiceStackProps props = null) : base(scope, name, props)
         {
             App = scope;
             Name = name;
@@ -471,7 +471,7 @@ namespace Olive.Aws.Cdk.Stacks
             return result ?? throw new System.Exception("Could not find the contianer for " + key);
         }
 
-        public class ServiceStackProps
+        public class ServiceStackProps : IStackProps
         {
             public string Subdomain { get; set; }
         }
