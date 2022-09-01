@@ -367,7 +367,7 @@ namespace Olive.Aws.Cdk.Stacks
                     ApiName = ToFullStackResourceName()
                 });
 
-            var apiIntegration = new LambdaProxyIntegration(new LambdaProxyIntegrationProps { Handler = ApplicationFunction });
+            var apiIntegration = new HttpLambdaIntegration(ToFullStackResourceName() + "HttpApiIntegration", ApplicationFunction, new HttpLambdaIntegrationProps());
 
             apiIntegration.Bind(new apigatewayV2.HttpRouteIntegrationBindOptions
             {
@@ -399,7 +399,7 @@ namespace Olive.Aws.Cdk.Stacks
             {
                 RecordName = GetDomainName().ToLower(),
                 Ttl = Duration.Minutes(5),
-                Target = new route53.RecordTarget(aliasTarget: new route53.Targets.ApiGatewayv2Domain(domainName)),
+                Target = new route53.RecordTarget(aliasTarget: new route53.Targets.ApiGatewayv2DomainProperties(GetDomainName().ToLower(), App.HostedZone.HostedZoneId)),
                 Zone = App.HostedZone
             });
         }
@@ -445,9 +445,9 @@ namespace Olive.Aws.Cdk.Stacks
         {
             var result = ConfigurationsParameterStoreValues;
             var levels = key.Split(":").ToArray();
-            levels.Do((level, indx) =>
+            levels.Do((level, index) =>
             {
-                var hasMoreDepth = indx < levels.Count() - 1;
+                var hasMoreDepth = index < levels.Count() - 1;
                 if (!result.ContainsKey(level))
                 {
                     if (hasMoreDepth)
@@ -459,8 +459,8 @@ namespace Olive.Aws.Cdk.Stacks
                 }
                 else
                 {
-                    result = result[level] as Dictionary<string, object>;
-                    if (hasMoreDepth && (result == null))
+                    var resultDictionary = result[level] as Dictionary<string, object>;
+                    if (hasMoreDepth && (resultDictionary == null))
                     {
                         throw new System.Exception(result[level] + " is not a container and cannot accept deeper level of configurations");
                     }
@@ -471,9 +471,24 @@ namespace Olive.Aws.Cdk.Stacks
             return result ?? throw new System.Exception("Could not find the contianer for " + key);
         }
 
-        public class ServiceStackProps : IStackProps
+        public class ServiceStackProps : StackProps
         {
             public string Subdomain { get; set; }
+
+            public ServiceStackProps Clone(string subdomain = "")
+            {
+                return new ServiceStackProps
+                {
+                    Subdomain = subdomain,
+                    AnalyticsReporting = AnalyticsReporting,
+                    Description = Description,
+                    Env = Env,
+                    StackName = StackName,
+                    Synthesizer = Synthesizer,
+                    Tags = Tags,
+                    TerminationProtection = TerminationProtection
+                };
+            }
         }
     }
 }
