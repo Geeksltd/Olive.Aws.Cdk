@@ -1,19 +1,18 @@
-﻿using Amazon.CDK;
+﻿using System;
+using Amazon.CDK;
 using Amazon.CDK.AWS.APIGatewayv2.Integrations;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.S3;
 using System.Linq;
-using Olive;
 using System.Collections.Generic;
+using System.IO;
 using apigatewayV2 = Amazon.CDK.AWS.APIGatewayv2;
 using events = Amazon.CDK.AWS.Events;
 using eventTargets = Amazon.CDK.AWS.Events.Targets;
 using route53 = Amazon.CDK.AWS.Route53;
 using ssm = Amazon.CDK.AWS.SSM;
-using System.Collections.Concurrent;
 using Newtonsoft.Json;
-using Amazon.CDK.AWS.Lambda.EventSources;
 
 namespace Olive.Aws.Cdk.Stacks
 {
@@ -78,7 +77,7 @@ namespace Olive.Aws.Cdk.Stacks
             if (StoreConfigurationsInSystemsParameters())
                 App.OnPrepared += () => WithConfigurationsParameterStore();
 
-            WithFunction(Name + "ApplicationFunction", ToFullStackResourceName());
+            WithFunction(Name + "ApplicationFunction", ToFullStackResourceName(), props?.AssetDirectory);
 
             if (HasBackgroundTasks())
                 WithCloudWatchBackgroundTaskTrigger();
@@ -305,13 +304,31 @@ namespace Olive.Aws.Cdk.Stacks
 
         protected virtual string ApplicationFunctionHandler() => "website::Website.ApiGatewayLambdaHandler::FunctionHandlerAsync";
 
-        protected ServiceStack WithFunction(string id, string functionName)
+        protected ServiceStack WithFunction(string id, string functionName, string assetDirectory)
         {
+            var assetPath = (assetDirectory ?? "/tmp/") + "BaseFunction.zip";
+
+            try
+            {
+                assetPath.AsFile().DeleteIfExists();
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                var assembly = assemblies.Single(a => a.FullName?.Contains("Olive.Aws.Cdk")??false);
+                var baseFunction = assembly.ReadEmbeddedResource("Olive.Aws.Cdk.BaseFunction.zip");
+                using var stream = new FileStream(assetPath, FileMode.CreateNew);
+                stream.Write(baseFunction, 0, baseFunction.Length);
+                stream.Close();
+            }
+            catch (Exception e)
+            {
+                Log.For<ServiceStack>().Error(e);
+                throw;
+            }
+
             ApplicationFunction = new NamedFunction(this, id,
                 new FunctionProps
                 {
                     FunctionName = functionName,
-                    Code = Code.FromAsset("BaseFunction.zip"),
+                    Code = Code.FromAsset(assetPath),
                     Runtime = Runtime.DOTNET_CORE_3_1,
                     Handler = ApplicationFunctionHandler(),
                     Timeout = LambdaTimeoutSeconds().Seconds(),
@@ -474,21 +491,7 @@ namespace Olive.Aws.Cdk.Stacks
         public class ServiceStackProps : StackProps
         {
             public string Subdomain { get; set; }
-
-            public ServiceStackProps Clone(string subdomain = "")
-            {
-                return new ServiceStackProps
-                {
-                    Subdomain = subdomain,
-                    AnalyticsReporting = AnalyticsReporting,
-                    Description = Description,
-                    Env = Env,
-                    StackName = StackName,
-                    Synthesizer = Synthesizer,
-                    Tags = Tags,
-                    TerminationProtection = TerminationProtection
-                };
-            }
+            public string AssetDirectory { get; set; }
         }
     }
 }
