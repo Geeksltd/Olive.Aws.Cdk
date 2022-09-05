@@ -28,7 +28,7 @@ namespace Olive.Aws.Cdk
         public s3.Bucket UserRoleBucket { get; }
         public ec2.SecurityGroup LambdaSecurityGroup { get; }
 
-        protected Suite(Props props)
+        protected Suite(Props props) : base(props)
         {
             Name = props.Name;
             Domain = props.Domain;
@@ -97,7 +97,7 @@ namespace Olive.Aws.Cdk
             => ServiceStacks.OfType<TStack>().FirstOrDefault()
             ?? throw new Exception($"{typeof(TStack).Name} stack has not been added to the app.");
 
-        public class Props
+        public class Props : AppProps
         {
             public string Name;
             public string Domain;
