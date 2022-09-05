@@ -132,13 +132,7 @@ namespace Olive.Aws.Cdk.Stacks
                     this,
                     "KMS",
                     "KMSEncryptDecrypt",
-                            PolicyStatementFactory.CreateAllow(
-                                new[]
-                                {
-                                    Action.Kms.GenerateDataKey,
-                                    Action.Kms.Decrypt
-                                },
-                                resourceArns: App.ApplicationMasterKey.GetArn())));
+                    PolicyStatementFactory.CreateAllow(new[] { Action.Kms.Decrypt }, resourceArns: App.ApplicationMasterKey.GetArn())));
         }
 
         void WithApplicationSecrets()
