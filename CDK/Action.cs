@@ -49,6 +49,14 @@ namespace Olive.Aws.Cdk
             public static Ssm GetParametersByPath { get; } = new Ssm { Name = nameof(GetParametersByPath) };
         }
 
+        public class ElasticFileSystem : Action
+        {
+            public static ElasticFileSystem ClientWrite { get; } = new ElasticFileSystem { Name = nameof(ClientWrite) };
+            public static ElasticFileSystem ClientMount { get; } = new ElasticFileSystem { Name = nameof(ClientMount) };
+            public static ElasticFileSystem DescribeMountTargets { get; } = new ElasticFileSystem { Name = nameof(DescribeMountTargets) };
+
+
+        }
 
         public class S3 : Action
         {
@@ -80,6 +88,7 @@ namespace Olive.Aws.Cdk
             public static Sqs SendMessageBatch { get; } = new Sqs { Name = nameof(SendMessageBatch) };
             public static Sqs DeleteMessageBatch { get; } = new Sqs { Name = nameof(DeleteMessageBatch) };
             public static Sqs DeleteMessage { get; } = new Sqs { Name = nameof(DeleteMessage) };
+            public static Sqs GetQueueAttributes { get; } = new Sqs { Name = nameof(GetQueueAttributes) };
 
             public static Sqs[] Write => new[]
             {
