@@ -1,18 +1,19 @@
-﻿using System;
-using Amazon.CDK;
-using Amazon.CDK.AWS.APIGatewayv2.Integrations;
+﻿using Amazon.CDK;
 using Amazon.CDK.AWS.IAM;
 using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.S3;
 using System.Linq;
 using System.Collections.Generic;
-using System.IO;
 using apigatewayV2 = Amazon.CDK.AWS.APIGatewayv2;
 using events = Amazon.CDK.AWS.Events;
 using eventTargets = Amazon.CDK.AWS.Events.Targets;
 using route53 = Amazon.CDK.AWS.Route53;
 using ssm = Amazon.CDK.AWS.SSM;
 using Newtonsoft.Json;
+using efs = Amazon.CDK.AWS.EFS;
+using System.IO;
+using System;
+using Amazon.CDK.AWS.APIGatewayv2.Integrations;
 
 namespace Olive.Aws.Cdk.Stacks
 {
@@ -37,6 +38,8 @@ namespace Olive.Aws.Cdk.Stacks
 
         internal NamedBucket TempApplicationBucket { get; private set; }
 
+        protected efs.FileSystem FileSystem { get; private set; }
+
         public Role RuntimeRole { get; private set; }
 
         public NamedFunction ApplicationFunction { get; private set; }
@@ -46,6 +49,10 @@ namespace Olive.Aws.Cdk.Stacks
         NamedStringParameter ConfigurationsParameterStore { get; set; }
 
         protected readonly Suite App;
+
+        protected efs.AccessPoint FileSystemAccessPoint { get; private set; }
+
+        Amazon.CDK.AWS.EC2.Connections_ Connections;
 
         protected events.Rule BackgroundTaskRule { get; private set; }
 
@@ -68,6 +75,9 @@ namespace Olive.Aws.Cdk.Stacks
 
             GrantStoringAntiForgeryKeyInSystemsManagerParameters();
 
+            if (HasFileSystem())
+                WithFileSystem();
+
             if (HasApplicationBucket())
                 WithApplicationBucket();
 
@@ -84,7 +94,55 @@ namespace Olive.Aws.Cdk.Stacks
 
             if (HasApiGateway())
                 WithApiGateway();
+
+
         }
+
+        protected virtual bool HasFileSystem() => false;
+
+        private void WithFileSystem()
+        {
+
+            FileSystem = new efs.FileSystem(this, Name + "FileSystem", new efs.FileSystemProps
+            {
+                Vpc = App.Vpc,
+                LifecyclePolicy = efs.LifecyclePolicy.AFTER_90_DAYS,
+                PerformanceMode = efs.PerformanceMode.MAX_IO,
+                VpcSubnets = App.LambdaSubnets.ToSubnetSelection(),
+                SecurityGroup = App.LambdaSecurityGroup,
+                Encrypted = true
+            });
+
+            FileSystemAccessPoint =
+                FileSystem.AddAccessPoint(Name + "AccessPoint", new efs.AccessPointOptions
+                {
+
+                    Path = GetFileSystemAccessPointPath().ToLower(),
+                    // as /export/lambda does not exist in a new efs filesystem, the efs will create the directory with the following createAcl
+                    CreateAcl = new efs.Acl
+                    {
+                        OwnerUid = "1001",
+                        OwnerGid = "1001",
+                        Permissions = "750"
+                    },
+                    //// enforce the POSIX identity so lambda function will access with this identity
+                    PosixUser = new efs.PosixUser
+                    {
+                        Uid = "1001",
+                        Gid = "1001"
+                    }
+                });
+
+            FileSystem.Node.Children.Do(el =>
+            {
+                if (el is efs.CfnMountTarget mountTarget)
+                    FileSystemAccessPoint.Node.AddDependency(mountTarget);
+            });
+
+
+            FileSystem.GrantWrite(RuntimeRole);
+        }
+        protected virtual string GetFileSystemAccessPointPath() => "/mnt/" + Name;
 
         protected virtual bool HasApiGateway() => true;
 
@@ -104,6 +162,8 @@ namespace Olive.Aws.Cdk.Stacks
                     })
                 }
             });
+
+            // AddApplicationConfiguration("Automated.Tasks:Enabled", "true");
         }
 
         static object CreateTriggerEventObject() =>
@@ -133,13 +193,19 @@ namespace Olive.Aws.Cdk.Stacks
                     "KMS",
                     "KMSEncryptDecrypt",
                             PolicyStatementFactory.CreateAllow(
-                                new[]
-                                {
-                                    Action.Kms.GenerateDataKey,
-                                    Action.Kms.Decrypt
-                                },
+                                GetMasterKeyPermittedActions().ToArray(),
                                 resourceArns: App.ApplicationMasterKey.GetArn())));
         }
+
+        private IEnumerable<Action> GetMasterKeyPermittedActions()
+        {
+            if (AuthenticateUsers())
+                yield return Action.Kms.GenerateDataKey;
+
+            yield return Action.Kms.Decrypt;
+        }
+
+        protected virtual bool AuthenticateUsers() => false;
 
         void WithApplicationSecrets()
         {
@@ -167,6 +233,7 @@ namespace Olive.Aws.Cdk.Stacks
             {
                 ParameterName = ToFullStackResourceName("-Configurations"),
                 Type = ssm.ParameterType.STRING,
+                Tier = ssm.ParameterTier.ADVANCED, // Standard has character limit
                 StringValue = JsonConvert.SerializeObject(ConfigurationsParameterStoreValues, Formatting.Indented)
             });
 
@@ -339,8 +406,11 @@ namespace Olive.Aws.Cdk.Stacks
                     SecurityGroups = new[] { App.LambdaSecurityGroup },
                     LogRetention = Amazon.CDK.AWS.Logs.RetentionDays.ONE_DAY,
                     Vpc = App.Vpc,
-                    VpcSubnets = App.LambdaSubnets.ToSubnetSelection()
+                    VpcSubnets = App.LambdaSubnets.ToSubnetSelection(),
+                    Filesystem = GetLambdaFunctionFileSystem()
                 });
+
+            ApplicationFunction.AddEnvironment("TZ", App.Timezone);
 
             ApplicationFunction.AddEnvironment("ASPNETCORE_ENVIRONMENT", App.AppEnvironmentName);
 
@@ -355,6 +425,9 @@ namespace Olive.Aws.Cdk.Stacks
             if (ApplicationBucket != null)
                 AddApplicationConfiguration("Blob:S3:Bucket", ApplicationBucket.BucketName);
 
+            if (HasFileSystem())
+                FileSystem.Connections.AllowDefaultPortFrom(ApplicationFunction, description: "Connection from " + Name);
+
             if (TempApplicationBucket != null)
                 AddApplicationConfiguration("Blob:S3:TempBucket", TempApplicationBucket.BucketName);
 
@@ -365,6 +438,19 @@ namespace Olive.Aws.Cdk.Stacks
             }
 
             return this;
+        }
+
+        Amazon.CDK.AWS.Lambda.FileSystem GetLambdaFunctionFileSystem()
+        {
+            if (!HasFileSystem())
+                return null;
+
+            return new Amazon.CDK.AWS.Lambda.FileSystem(new Amazon.CDK.AWS.Lambda.FileSystemConfig
+            {
+                Arn = FileSystemAccessPoint.AccessPointArn,
+                LocalMountPath = GetFileSystemAccessPointPath().ToLower(),
+                Dependency = new[] { FileSystemAccessPoint }
+            });
         }
 
         internal void ClaimReadWrite(NamedBucket bucket)
