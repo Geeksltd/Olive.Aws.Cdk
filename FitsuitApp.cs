@@ -10,6 +10,8 @@ using ec2 = Amazon.CDK.AWS.EC2;
 using kms = Amazon.CDK.AWS.KMS;
 using route53 = Amazon.CDK.AWS.Route53;
 using s3 = Amazon.CDK.AWS.S3;
+using efs = Amazon.CDK.AWS.EFS;
+using Olive.Aws.Cdk;
 
 namespace Olive.Aws.Cdk
 {
@@ -28,6 +30,7 @@ namespace Olive.Aws.Cdk
         public s3.Bucket UserRoleBucket { get; }
         public ec2.SecurityGroup LambdaSecurityGroup { get; }
 
+        public string Timezone;
         protected Suite(Props props) : base(props)
         {
             Name = props.Name;
@@ -41,6 +44,7 @@ namespace Olive.Aws.Cdk
             LambdaSecurityGroup = SecurityGroupFactory.Create(ApplicationResourceStack, Name + "LambdaSecurityGroup", Vpc);
             ApplicationSourcecodeBucket = S3Factory.CreteMortalBucket(ApplicationResourceStack, Name + "Sourcecode");
             UserRoleBucket = S3Factory.CreteMortalBucket(ApplicationResourceStack, Name + "UserRoles");
+            Timezone = props.Timezone;
 
             WithKMSMasterKey();
 
@@ -51,7 +55,9 @@ namespace Olive.Aws.Cdk
                 UserRoleBucket.GrantRead(s.RuntimeRole);
                 s.ApplicationFunction.AddApplicationConfig("Authentication:UserRolesBucket", UserRoleBucket.BucketName);
             });
+
         }
+
 
         internal event System.Action OnPrepared;
         protected override void OnPrepare()
@@ -106,6 +112,7 @@ namespace Olive.Aws.Cdk
             public string AppEnvironmentName;
             public string VpcId;
             public string[] LambdaSubnetIds;
+            public string Timezone;
         }
     }
 }
