@@ -302,6 +302,8 @@ namespace Olive.Aws.Cdk.Stacks
 
         protected virtual int LambdaTimeoutSeconds() => 60;
 
+        protected virtual string CustomRuntime() => "";
+
         protected virtual string ApplicationFunctionHandler() => "website::Website.ApiGatewayLambdaHandler::FunctionHandlerAsync";
 
         protected ServiceStack WithFunction(string id, string functionName, string assetDirectory)
@@ -312,7 +314,7 @@ namespace Olive.Aws.Cdk.Stacks
             {
                 assetPath.AsFile().DeleteIfExists();
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                var assembly = assemblies.Single(a => a.FullName?.Contains("Olive.Aws.Cdk")??false);
+                var assembly = assemblies.Single(a => a.FullName?.Contains("Olive.Aws.Cdk") ?? false);
                 var baseFunction = assembly.ReadEmbeddedResource("Olive.Aws.Cdk.BaseFunction.zip");
                 using var stream = new FileStream(assetPath, FileMode.CreateNew);
                 stream.Write(baseFunction, 0, baseFunction.Length);
@@ -329,7 +331,7 @@ namespace Olive.Aws.Cdk.Stacks
                 {
                     FunctionName = functionName,
                     Code = Code.FromAsset(assetPath),
-                    Runtime = Runtime.DOTNET_CORE_3_1,
+                    Runtime = RuntimeFactory.Create(CustomRuntime()),
                     Handler = ApplicationFunctionHandler(),
                     Timeout = LambdaTimeoutSeconds().Seconds(),
                     MemorySize = (int)LambdaMemorySize(),
