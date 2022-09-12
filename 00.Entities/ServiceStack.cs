@@ -504,7 +504,7 @@ namespace Olive.Aws.Cdk.Stacks
             {
                 RecordName = GetDomainName().ToLower(),
                 Ttl = Duration.Minutes(5),
-                Target = new route53.RecordTarget(aliasTarget: new route53.Targets.ApiGatewayv2DomainProperties(App.Domain.ToLower(), App.HostedZone.HostedZoneId)),
+                Target = new route53.RecordTarget(aliasTarget: new route53.Targets.ApiGatewayv2DomainProperties(domainName.RegionalDomainName, domainName.RegionalHostedZoneId)),
                 Zone = App.HostedZone
             });
         }
