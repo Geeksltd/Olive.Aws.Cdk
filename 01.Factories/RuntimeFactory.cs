@@ -2,16 +2,15 @@
 
 namespace Olive.Aws.Cdk
 {
-    public class RuntimeFactory
+    public static class RuntimeFactory
     {
         public static Runtime Create(string customRuntime)
         {
-            switch (customRuntime)
+            return customRuntime switch
             {
-                case "DOTNET_CORE_NODE_JS": return CreateDotNetCoreNodeJsRuntime();
-            }
-
-            return Runtime.DOTNET_CORE_3_1;
+                "DOTNET_CORE_NODE_JS" => CreateDotNetCoreNodeJsRuntime(),
+                _ => Runtime.DOTNET_CORE_3_1
+            };
         }
 
         private static Runtime CreateDotNetCoreNodeJsRuntime()
