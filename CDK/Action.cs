@@ -27,6 +27,13 @@ namespace Olive.Aws.Cdk
             public static Kms Encrypt { get; } = new Kms { Name = nameof(Encrypt) };
         }
 
+        public class Ses : Action
+        {
+            internal static Ses All => new Ses { Name = "*" };
+            public static Ses SendEmail { get; } = new Ses { Name = nameof(SendEmail) };
+            public static Ses SendRawEmail { get; } = new Ses { Name = nameof(SendRawEmail) };
+        }
+
         public class Sts : Action
         {
             public static Sts AssumeRole { get; } = new Sts { Name = nameof(AssumeRole) };
