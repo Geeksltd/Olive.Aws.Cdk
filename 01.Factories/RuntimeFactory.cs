@@ -9,8 +9,9 @@ namespace Olive.Aws.Cdk
             return customRuntime switch
             {
                 "DOTNET_6" => Runtime.DOTNET_6,
+                "DOTNET_CORE_3_1" => Runtime.DOTNET_CORE_3_1,
                 "DOTNET_CORE_NODE_JS" => CreateDotNetCoreNodeJsRuntime(),
-                _ => Runtime.DOTNET_CORE_3_1
+                _ => Runtime.DOTNET_6
             };
         }
 
