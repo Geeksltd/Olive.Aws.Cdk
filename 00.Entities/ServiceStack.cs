@@ -433,7 +433,7 @@ namespace Olive.Aws.Cdk.Stacks
 
             if (ApplicationSecrets != null)
             {
-                AddApplicationConfiguration("Aws:Secrets:Id", ApplicationSecrets.Name);
+                AddApplicationConfiguration("Aws:Secrets:Id", ApplicationSecrets.Name,true);
                 AddApplicationConfiguration("Aws:Secrets:Region", Region);
             }
 
@@ -538,9 +538,9 @@ namespace Olive.Aws.Cdk.Stacks
         protected virtual bool EnableSqsEventSources => false;
         protected virtual int SqsEventSourcesBatchSize => 1;
 
-        public void AddApplicationConfiguration(string key, string value)
+        public void AddApplicationConfiguration(string key, string value, bool forceEnvironment=false)
         {
-            if (StoreConfigurationsInSystemsParameters())
+            if (StoreConfigurationsInSystemsParameters()&&!forceEnvironment)
                 GetConfigurationContainer(key).Add(key.Split(":").Last(), value);
             else
                 ApplicationFunction.AddApplicationConfig(key, value);
