@@ -14,6 +14,7 @@ using efs = Amazon.CDK.AWS.EFS;
 using System.IO;
 using System;
 using Amazon.CDK.AWS.APIGatewayv2.Integrations;
+using System.ComponentModel;
 
 namespace Olive.Aws.Cdk.Stacks
 {
@@ -569,6 +570,7 @@ namespace Olive.Aws.Cdk.Stacks
                     {
                         throw new System.Exception(result[level] + " is not a container and cannot accept deeper level of configurations");
                     }
+                    result = resultDictionary;
                 }
             });
 
