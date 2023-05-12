@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>Geeks Ltd</Authors>
     <Company>Geeks Ltd</Company>
-    <Version>1.0.17</Version>
+    <Version>1.0.18</Version>
   </PropertyGroup>
 
   <ItemGroup>
