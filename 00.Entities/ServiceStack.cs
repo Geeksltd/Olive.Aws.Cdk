@@ -325,7 +325,7 @@ namespace Olive.Aws.Cdk.Stacks
                         Expiration = Duration.Days(1)
                     }
                 },
-                AccessControl = BucketAccessControl.PUBLIC_READ_WRITE,
+                ObjectOwnership =  ObjectOwnership.BUCKET_OWNER_ENFORCED,
                 Cors = new[]
                 {
                     new CorsRule
@@ -337,19 +337,19 @@ namespace Olive.Aws.Cdk.Stacks
                 }
             });
 
-            TempApplicationBucket.GrantRead(RuntimeRole);
+            TempApplicationBucket.GrantReadWrite(RuntimeRole);
 
             return this;
         }
 
-        protected NamedBucket CreateBucket(string bucketName, string bucketId, RemovalPolicy removalPolicy = RemovalPolicy.RETAIN, BlockPublicAccess? blockPublicAccess = null)
+        protected NamedBucket CreateBucket(string bucketName, string bucketId, RemovalPolicy removalPolicy = RemovalPolicy.RETAIN)
         {
             var result = new NamedBucket(this, bucketId, new BucketProps
             {
                 BucketName = bucketName,
                 RemovalPolicy = removalPolicy,
                 Versioned = true,
-                BlockPublicAccess = blockPublicAccess ?? BlockPublicAccess.BLOCK_ALL
+                ObjectOwnership = ObjectOwnership.BUCKET_OWNER_ENFORCED
             });
 
             result.GrantReadWrite(RuntimeRole);
