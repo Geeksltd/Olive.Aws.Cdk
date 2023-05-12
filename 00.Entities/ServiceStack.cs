@@ -316,6 +316,9 @@ namespace Olive.Aws.Cdk.Stacks
                 BlockPublicAccess = new BlockPublicAccess(new BlockPublicAccessOptions
                 {
                     BlockPublicPolicy = false,
+                    BlockPublicAcls = false,
+                    IgnorePublicAcls = false,
+                    RestrictPublicBuckets = false
                 }),
                 LifecycleRules = new[]
                 {
@@ -325,31 +328,34 @@ namespace Olive.Aws.Cdk.Stacks
                         Expiration = Duration.Days(1)
                     }
                 },
-                ObjectOwnership =  ObjectOwnership.BUCKET_OWNER_ENFORCED,
+                // AccessControl = BucketAccessControl.PUBLIC_READ_WRITE,
                 Cors = new[]
                 {
                     new CorsRule
                     {
-                       AllowedOrigins = new []{"https://*."+App.Domain,},
+                       AllowedOrigins = new [] { "https://*." + App.Domain },
                        AllowedHeaders =  new [] { "*" },
-                       AllowedMethods = new [] {HttpMethods.POST, HttpMethods.GET  }
+                       AllowedMethods = new [] { HttpMethods.POST, HttpMethods.GET  }
                     }
                 }
             });
 
-            TempApplicationBucket.GrantReadWrite(RuntimeRole);
+            TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.ListBucket,new AnyPrincipal(), TempApplicationBucket.GetArn()));
+            TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.WildcardObject,new AnyPrincipal(), TempApplicationBucket.GetArn()+"/*"));
+            
+            TempApplicationBucket.GrantRead(RuntimeRole);
 
             return this;
         }
 
-        protected NamedBucket CreateBucket(string bucketName, string bucketId, RemovalPolicy removalPolicy = RemovalPolicy.RETAIN)
+        protected NamedBucket CreateBucket(string bucketName, string bucketId, RemovalPolicy removalPolicy = RemovalPolicy.RETAIN, BlockPublicAccess? blockPublicAccess = null)
         {
             var result = new NamedBucket(this, bucketId, new BucketProps
             {
                 BucketName = bucketName,
                 RemovalPolicy = removalPolicy,
                 Versioned = true,
-                ObjectOwnership = ObjectOwnership.BUCKET_OWNER_ENFORCED
+                BlockPublicAccess = blockPublicAccess ?? BlockPublicAccess.BLOCK_ALL
             });
 
             result.GrantReadWrite(RuntimeRole);
@@ -434,7 +440,7 @@ namespace Olive.Aws.Cdk.Stacks
 
             if (ApplicationSecrets != null)
             {
-                AddApplicationConfiguration("Aws:Secrets:Id", ApplicationSecrets.Name,true);
+                AddApplicationConfiguration("Aws:Secrets:Id", ApplicationSecrets.Name, true);
                 AddApplicationConfiguration("Aws:Secrets:Region", Region);
             }
 
@@ -539,9 +545,9 @@ namespace Olive.Aws.Cdk.Stacks
         protected virtual bool EnableSqsEventSources => false;
         protected virtual int SqsEventSourcesBatchSize => 1;
 
-        public void AddApplicationConfiguration(string key, string value, bool forceEnvironment=false)
+        public void AddApplicationConfiguration(string key, string value, bool forceEnvironment = false)
         {
-            if (StoreConfigurationsInSystemsParameters()&&!forceEnvironment)
+            if (StoreConfigurationsInSystemsParameters() && !forceEnvironment)
                 GetConfigurationContainer(key).Add(key.Split(":").Last(), value);
             else
                 ApplicationFunction.AddApplicationConfig(key, value);

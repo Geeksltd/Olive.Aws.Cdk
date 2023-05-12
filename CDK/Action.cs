@@ -71,8 +71,9 @@ namespace Olive.Aws.Cdk
             public static S3 DeleteObject { get; } = new S3 { Name = nameof(DeleteObject) };
             public static S3 GetBucket { get; } = new S3 { Name = nameof(GetBucket) };
             public static S3 GetObject { get; } = new S3 { Name = nameof(GetObject) };
-            public static S3 List { get; } = new S3 { Name = nameof(List) };
+            public static S3 ListBucket { get; } = new S3 { Name = nameof(ListBucket) };
             public static S3 PutObject { get; } = new S3 { Name = nameof(PutObject) };
+            public static S3 WildcardObject { get; } = new S3 { Name = "*Object" };
 
             public static S3[] ReadWrite => new[]
             {
@@ -80,7 +81,7 @@ namespace Olive.Aws.Cdk
                 DeleteObject,
                 GetBucket,
                 GetObject,
-                List,
+                ListBucket,
                 PutObject
             };
 
