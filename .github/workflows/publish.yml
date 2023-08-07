@@ -16,9 +16,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Publish NuGet Package
-      uses: brandedoutcast/publish-nuget@v2
-      with:
-        PROJECT_FILE_PATH: Olive.Aws.Cdk.csproj
-        NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+    - name: Package
+      run: dotnet pack -c Release -o . Olive.Aws.Cdk.csproj
+
+    - name: Publish
+      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
