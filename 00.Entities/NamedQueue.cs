@@ -20,7 +20,7 @@ namespace Olive.Aws.Cdk
         public void GrantSendMessages(IEnumerable<ServiceStack> stacks) => stacks.Do(GrantSendMessages);
 
         internal void GrantConsumeMessages(ServiceStack stack) =>
-            Grant(stack, $"write-for-{stack.Name.ToLower()}-{Name.ToLower()}", Action.Sqs.Read);
+            Grant(stack, $"read-for-{stack.Name.ToLower()}-{Name.ToLower()}", Action.Sqs.Read);
 
         internal void Grant(ServiceStack stack, string inlinePolicyName, Action[] actions)
         {
