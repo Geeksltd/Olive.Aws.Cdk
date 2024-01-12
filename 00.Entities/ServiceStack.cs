@@ -14,7 +14,7 @@ using efs = Amazon.CDK.AWS.EFS;
 using System.IO;
 using System;
 using Amazon.CDK.AWS.APIGatewayv2.Integrations;
-using System.ComponentModel;
+using Amazon.CDK.AWS.EC2;
 
 namespace Olive.Aws.Cdk.Stacks
 {
@@ -284,13 +284,13 @@ namespace Olive.Aws.Cdk.Stacks
             // TODO: To be removed after full migration
             RuntimeRole.AttachInlinePolicy(PolicyFactory.Create(RuntimeRole, "EmailCommand_Permissions", "EmailCommand_Permissions",
                 PolicyStatementFactory.CreateAllow(Action.Sqs.ReadWrite, resourceArns:
-                    $"arn:aws:sqs:eu-west-1:669486994886:EmailService-SendEmailCommand"
+                    "arn:aws:sqs:eu-west-1:669486994886:EmailService-SendEmailCommand"
                 )));
 
             // TODO : To be removed after full migration
             RuntimeRole.AttachInlinePolicy(PolicyFactory.Create(RuntimeRole, "TasksService-CreateTaskCommand", "TasksService-CreateTaskCommand",
               PolicyStatementFactory.CreateAllow(Action.Sqs.ReadWrite, resourceArns:
-                  $"arn:aws:sqs:eu-west-1:669486994886:TasksService-CreateTaskCommand"
+                  "arn:aws:sqs:eu-west-1:669486994886:TasksService-CreateTaskCommand"
               )));
         }
 
@@ -376,8 +376,6 @@ namespace Olive.Aws.Cdk.Stacks
 
         protected virtual int LambdaTimeoutSeconds() => 60;
 
-        protected virtual string CustomRuntime() => "";
-
         protected virtual string ApplicationFunctionHandler() => "website::Website.ApiGatewayLambdaHandler::FunctionHandlerAsync";
 
         protected ServiceStack WithFunction(string id, string functionName, string assetDirectory)
@@ -405,16 +403,17 @@ namespace Olive.Aws.Cdk.Stacks
                 {
                     FunctionName = functionName,
                     Code = Code.FromAsset(assetPath),
-                    Runtime = RuntimeFactory.Create(CustomRuntime()),
+                    Runtime = Runtime.DOTNET_6,
                     Handler = ApplicationFunctionHandler(),
                     Timeout = LambdaTimeoutSeconds().Seconds(),
                     MemorySize = (int)LambdaMemorySize(),
                     Role = RuntimeRole,
-                    SecurityGroups = new[] { App.LambdaSecurityGroup },
+                    SecurityGroups = new ISecurityGroup[] { App.LambdaSecurityGroup },
                     LogRetention = Amazon.CDK.AWS.Logs.RetentionDays.ONE_DAY,
                     Vpc = App.Vpc,
                     VpcSubnets = App.LambdaSubnets.ToSubnetSelection(),
-                    Filesystem = GetLambdaFunctionFileSystem()
+                    Filesystem = GetLambdaFunctionFileSystem(),
+                    ReservedConcurrentExecutions = 5
                 });
 
             ApplicationFunction.AddEnvironment("TZ", App.Timezone);
