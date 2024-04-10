@@ -14,11 +14,16 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v2
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "8.x"
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Package
-      run: dotnet pack -c Release -o . Olive.Aws.Cdk.csproj
+      - name: Package
+        run: dotnet pack -c Release -o . Olive.Aws.Cdk.csproj
 
-    - name: Publish
-      run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
+      - name: Publish
+        run: dotnet nuget push *.nupkg -k ${{ secrets.NUGET_API_KEY }} -s https://api.nuget.org/v3/index.json
 
