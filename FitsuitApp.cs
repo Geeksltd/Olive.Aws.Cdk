@@ -56,14 +56,14 @@ namespace Olive.Aws.Cdk
                 s.ApplicationFunction.AddApplicationConfig("Authentication:UserRolesBucket", UserRoleBucket.BucketName);
             });
 
+            OnPrepare();
         }
 
 
         internal event System.Action OnPrepared;
-        protected override void OnPrepare()
-        {
-            base.OnPrepare();
 
+        protected virtual void OnPrepare()
+        {
             OnPrepared?.Invoke();
         }
 

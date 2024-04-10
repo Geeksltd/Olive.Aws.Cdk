@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Authors>Geeks Ltd</Authors>
     <Company>Geeks Ltd</Company>
-    <Version>1.0.20</Version>
+    <Version>2.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,22 +18,8 @@
   </ItemGroup>
 	<ItemGroup>
     <!-- CDK Construct Library dependencies -->
-	<PackageReference Include="Amazon.CDK" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.APIGateway" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.APIGatewayv2.Integrations" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.CodeBuild" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.CodeDeploy" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.CodePipeline" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.CodePipeline.Actions" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.Events" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.Events.Targets" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.Lambda" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.Lambda.EventSources" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.S3" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.SecretsManager" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.SQS" Version="1.201.0" />
-    <PackageReference Include="Amazon.CDK.AWS.SSM" Version="1.201.0" />
-    <PackageReference Include="Olive" Version="2.1.338" />
+    <PackageReference Include="Amazon.CDK.Lib" Version="2.136.1" />
+    <PackageReference Include="Olive" Version="2.1.364" />
 
     <!-- jsii Roslyn analyzers (un-comment to obtain compile-time checks for missing required props
     <PackageReference Include="Amazon.Jsii.Analyzers" Version="*" PrivateAssets="all" />

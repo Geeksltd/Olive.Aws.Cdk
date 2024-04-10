@@ -4,7 +4,7 @@ using Amazon.CDK.AWS.Lambda;
 using Amazon.CDK.AWS.S3;
 using System.Linq;
 using System.Collections.Generic;
-using apigatewayV2 = Amazon.CDK.AWS.APIGatewayv2;
+using apigatewayV2 = Amazon.CDK.AWS.Apigatewayv2;
 using events = Amazon.CDK.AWS.Events;
 using eventTargets = Amazon.CDK.AWS.Events.Targets;
 using route53 = Amazon.CDK.AWS.Route53;
@@ -13,8 +13,8 @@ using Newtonsoft.Json;
 using efs = Amazon.CDK.AWS.EFS;
 using System.IO;
 using System;
-using Amazon.CDK.AWS.APIGatewayv2.Integrations;
 using Amazon.CDK.AWS.EC2;
+using Amazon.CDK.AwsApigatewayv2Integrations;
 
 namespace Olive.Aws.Cdk.Stacks
 {
@@ -86,7 +86,7 @@ namespace Olive.Aws.Cdk.Stacks
                 WithApplicationSecrets();
 
             if (StoreConfigurationsInSystemsParameters())
-                App.OnPrepared += () => WithConfigurationsParameterStore();
+                App.OnPrepared += WithConfigurationsParameterStore;
 
             WithFunction(Name + "ApplicationFunction", ToFullStackResourceName(), props?.AssetDirectory);
 
@@ -96,6 +96,11 @@ namespace Olive.Aws.Cdk.Stacks
             if (HasApiGateway())
                 WithApiGateway();
 
+            App.OnPrepared += OnPrepare;
+        }
+
+        protected virtual void OnPrepare()
+        {
 
         }
 
@@ -213,7 +218,6 @@ namespace Olive.Aws.Cdk.Stacks
             ApplicationSecrets = new NamedStringParameter(this, Name + "ApplicationSecrets", new ssm.StringParameterProps
             {
                 ParameterName = ToFullStackResourceName(),
-                Type = ssm.ParameterType.STRING,
                 StringValue = "{}" //<-- DO NOT CHANGE THIS LINE
 
             });
@@ -233,7 +237,6 @@ namespace Olive.Aws.Cdk.Stacks
             ConfigurationsParameterStore = new NamedStringParameter(this, Name + "Configurations", new ssm.StringParameterProps
             {
                 ParameterName = ToFullStackResourceName("-Configurations"),
-                Type = ssm.ParameterType.STRING,
                 Tier = ssm.ParameterTier.ADVANCED, // Standard has character limit
                 StringValue = JsonConvert.SerializeObject(ConfigurationsParameterStoreValues, Formatting.Indented)
             });
@@ -340,9 +343,9 @@ namespace Olive.Aws.Cdk.Stacks
                 }
             });
 
-            TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.ListBucket,new AnyPrincipal(), TempApplicationBucket.GetArn()));
-            TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.WildcardObject,new AnyPrincipal(), TempApplicationBucket.GetArn()+"/*"));
-            
+            TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.ListBucket, new AnyPrincipal(), TempApplicationBucket.GetArn()));
+            TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.WildcardObject, new AnyPrincipal(), TempApplicationBucket.GetArn()+"/*"));
+
             TempApplicationBucket.GrantRead(RuntimeRole);
 
             return this;
@@ -376,6 +379,8 @@ namespace Olive.Aws.Cdk.Stacks
 
         protected virtual int LambdaTimeoutSeconds() => 60;
 
+        protected virtual string CustomRuntime() => "dotnet8";
+
         protected virtual string ApplicationFunctionHandler() => "website::Website.ApiGatewayLambdaHandler::FunctionHandlerAsync";
 
         protected ServiceStack WithFunction(string id, string functionName, string assetDirectory)
@@ -403,7 +408,7 @@ namespace Olive.Aws.Cdk.Stacks
                 {
                     FunctionName = functionName,
                     Code = Code.FromAsset(assetPath),
-                    Runtime = Runtime.DOTNET_6,
+                    Runtime = Runtime.ALL.SingleOrDefault(a => a.Name == CustomRuntime()) ?? Runtime.DOTNET_8,
                     Handler = ApplicationFunctionHandler(),
                     Timeout = LambdaTimeoutSeconds().Seconds(),
                     MemorySize = (int)LambdaMemorySize(),
