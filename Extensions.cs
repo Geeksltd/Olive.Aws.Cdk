@@ -9,7 +9,7 @@ namespace Olive.Aws.Cdk
 {
     public static class Extensions
     {
-        public static ArnFormatter GetArnFormatter(this IResource resource) => new ArnFormatter(resource.Stack);
+        public static ArnFormatter GetArnFormatter(this IResource resource) => new(resource.Stack);
 
         public static string GetArn(this kms.IKey key) => key.GetArnFormatter().CreateArn("kms", "key/" + key.KeyId);
 
@@ -24,8 +24,7 @@ namespace Olive.Aws.Cdk
         public static Function AddApplicationConfig(this Function @this, string key, string value) =>
             @this.AddEnvironment("CONFIG__" + key.Replace(":", "__"), value);
 
-        internal static SubnetSelection ToSubnetSelection(this IEnumerable<ISubnet> @this) =>
-            new SubnetSelection { Subnets = @this.ToArray() };
+        internal static SubnetSelection ToSubnetSelection(this IEnumerable<ISubnet> @this) => new() { Subnets = @this.ToArray() };
 
         internal static ISubnet[] GetLambdaSubnets(this IVpc @this) => @this.GetSubnets("Lambda");
 

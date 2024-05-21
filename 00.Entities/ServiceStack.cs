@@ -86,7 +86,7 @@ namespace Olive.Aws.Cdk.Stacks
                 WithApplicationSecrets();
 
             if (StoreConfigurationsInSystemsParameters())
-                App.OnPrepared += WithConfigurationsParameterStore;
+                App.OnPreparedEvent += WithConfigurationsParameterStore;
 
             WithFunction(Name + "ApplicationFunction", ToFullStackResourceName(), props?.AssetDirectory);
 
@@ -96,7 +96,7 @@ namespace Olive.Aws.Cdk.Stacks
             if (HasApiGateway())
                 WithApiGateway();
 
-            App.OnPrepared += OnPrepare;
+            App.OnPrepareEvent += OnPrepare;
         }
 
         protected virtual void OnPrepare()
@@ -228,7 +228,7 @@ namespace Olive.Aws.Cdk.Stacks
                 .CreateAllow(Action.Ssm.GetParametersByPath, resourceArns: ApplicationSecrets.ParameterArn + "/"));
         }
 
-        Dictionary<string, object> ConfigurationsParameterStoreValues = new Dictionary<string, object>();
+        Dictionary<string, object> ConfigurationsParameterStoreValues = new();
         void WithConfigurationsParameterStore()
         {
             if (ConfigurationsParameterStoreValues.None())

@@ -4,7 +4,7 @@ namespace Olive.Aws.Cdk
 {
     class ServicePrincipals
     {
-        static ServicePrincipal CreatePrincipal(string serviceName) => new ServicePrincipal(serviceName + ".amazonaws.com");
+        static ServicePrincipal CreatePrincipal(string serviceName) => new(serviceName + ".amazonaws.com");
 
         internal static ServicePrincipal Lambda => CreatePrincipal("lambda");
         internal static ServicePrincipal CodePipeline => CreatePrincipal("codepipeline");

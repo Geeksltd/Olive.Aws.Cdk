@@ -57,14 +57,21 @@ namespace Olive.Aws.Cdk
             });
 
             OnPrepare();
+            OnPrepared();
         }
 
 
-        internal event System.Action OnPrepared;
+        internal event System.Action OnPrepareEvent;
+        internal event System.Action OnPreparedEvent;
 
         protected virtual void OnPrepare()
         {
-            OnPrepared?.Invoke();
+            OnPrepareEvent?.Invoke();
+        }
+
+        protected virtual void OnPrepared()
+        {
+            OnPreparedEvent?.Invoke();
         }
 
         protected abstract void AddStacks();

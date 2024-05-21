@@ -18,6 +18,6 @@ namespace Olive.Aws.Cdk
             CreateQueue(scope, name, true, visibility);
 
         static NamedQueue CreateQueue(ServiceStack scope, string name, bool fifo, double? visibility = 60) =>
-            new NamedQueue(scope, name, new QueueProps { Fifo = fifo, QueueName = name, VisibilityTimeout = visibility?.Seconds() });
+            new(scope, name, new QueueProps { Fifo = fifo, QueueName = name, VisibilityTimeout = visibility?.Seconds() });
     }
 }
