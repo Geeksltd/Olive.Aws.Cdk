@@ -340,14 +340,15 @@ namespace Olive.Aws.Cdk.Stacks
                        AllowedHeaders =  new [] { "*" },
                        AllowedMethods = new [] { HttpMethods.POST, HttpMethods.GET  }
                     }
-                }
+                } ,
+                ObjectOwnership =  ObjectOwnership.OBJECT_WRITER
             });
 
             TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.ListBucket, new AnyPrincipal(), TempApplicationBucket.GetArn()));
             TempApplicationBucket.AddToResourcePolicy(PolicyStatementFactory.CreateAllow(Action.S3.WildcardObject, new AnyPrincipal(), TempApplicationBucket.GetArn()+"/*"));
 
             TempApplicationBucket.GrantRead(RuntimeRole);
-
+           
             return this;
         }
 
